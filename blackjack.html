@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🃏 Blackjack 21</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    h1 {
+      font-size: 2.5em;
+      color: #ffd700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      margin-bottom: 10px;
+    }
+    
+    .game-panel {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+    }
+    
+    .player-section {
+      margin: 25px 0;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .player-title {
+      font-size: 1.3em;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #ffd700;
+    }
+    
+    .cards {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      min-height: 120px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .card {
+      width: 70px;
+      height: 100px;
+      background: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      border: 2px solid #ddd;
+      transform-style: preserve-3d;
+      transition: all 0.6s ease;
+      position: relative;
+    }
+    
+    .card.red {
+      color: #e74c3c;
+    }
+    
+    .card.black {
+      color: #2c3e50;
+    }
+    
+    .card.back {
+      background: linear-gradient(45deg, #2c3e50, #34495e);
+      color: transparent;
+    }
+    
+    .card.back::after {
+      content: "🂠";
+      font-size: 30px;
+      color: #ecf0f1;
+    }
+    
+    .card.flip {
+      transform: rotateY(180deg);
+    }
+    
+    .hand-value {
+      font-size: 1.1em;
+      font-weight: 600;
+      color: #fff;
+      margin-top: 10px;
+    }
+    
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin: 25px 0;
+    }
+    
+    .game-button {
+      font-family: 'Sarabun', sans-serif;
+      font-size: 1.1em;
+      font-weight: 600;
+      padding: 12px 25px;
+      background: linear-gradient(45deg, #ffd700, #ffed4e);
+      color: #333;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      min-width: 100px;
+      text-shadow: none;
+    }
+    
+    .game-button:hover {
+      background: linear-gradient(45deg, #ffed4e, #fff);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    
+    .game-button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    
+    .game-button:disabled {
+      background: #666;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    #status {
+      font-size: 1.4em;
+      font-weight: 600;
+      margin: 20px 0;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffd700;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+    
+    .dealer-section {
+      order: -1;
+    }
+    
+    @media (max-width: 600px) {
+      body {
+        padding: 5px;
+      }
+      
+      h1 {
+        font-size: 2em;
+      }
+      
+      .game-panel {
+        padding: 20px;
+      }
+      
+      .player-title {
+        font-size: 1.2em;
+      }
+      
+      .game-button {
+        font-size: 1em;
+        padding: 10px 20px;
+        min-width: 80px;
+      }
+      
+      .card {
+        width: 60px;
+        height: 85px;
+        font-size: 16px;
+      }
+      
+      .card.back::after {
+        font-size: 24px;
+      }
+      
+      #status {
+        font-size: 1.2em;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🃏 แบล็คแจ็ค 21</h1>
+  </header>
+
+  <div class="game-panel">
+    <div class="player-section dealer-section">
+      <div class="player-title">🎭 เจ้ามือ</div>
+      <div id="dealer-cards" class="cards"></div>
+      <div id="dealer-value" class="hand-value"></div>
+    </div>
+    
+    <div class="player-section">
+      <div class="player-title">👤 คุณ</div>
+      <div id="player-cards" class="cards"></div>
+      <div id="player-value" class="hand-value"></div>
+    </div>
+    
+    <div class="controls">
+      <button class="game-button" id="hit-btn" onclick="hit()">จั่วไพ่</button>
+      <button class="game-button" id="stand-btn" onclick="stand()">ยืน</button>
+      <button class="game-button" onclick="restart()">เริ่มใหม่</button>
+    </div>
+    
+    <div id="status"></div>
+  </div>
+</div>
+
+<script>
+// ข้อมูลไพ่
+const suits = ['♠','♥','♦','♣'];
+const values = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+let deck, playerCards, dealerCards, gameOver;
+
+// เสียง (ใช้ Web Audio API)
+let audioContext;
+
+function initAudio() {
+  try {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  } catch(e) {
+    console.log('Audio not supported');
+  }
+}
+
+function playTone(frequency, duration, type = 'sine') {
+  if (!audioContext) return;
+  
+  try {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = frequency;
+    oscillator.type = type;
+    
+    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + duration);
+  } catch(e) {
+    console.log('Sound play failed');
+  }
+}
+
+function playCardSound() {
+  playTone(600, 0.2);
+}
+
+function playWinSound() {
+  playTone(800, 0.2);
+  setTimeout(() => playTone(1000, 0.2), 100);
+  setTimeout(() => playTone(1200, 0.3), 200);
+}
+
+function playLoseSound() {
+  playTone(300, 0.5, 'sawtooth');
+}
+
+// ฟังก์ชันเกม
+function createDeck() {
+  let d = [];
+  for(let s of suits) {
+    for(let v of values) {
+      d.push({suit: s, value: v});
+    }
+  }
+  return d.sort(() => Math.random() - 0.5);
+}
+
+function getCardValue(c) {
+  if(['J','Q','K'].includes(c.value)) return 10;
+  if(c.value === 'A') return 11;
+  return +c.value;
+}
+
+function handValue(cards) {
+  let total = 0, aces = 0;
+  for(let c of cards) {
+    total += getCardValue(c);
+    if(c.value === 'A') aces++;
+  }
+  while(total > 21 && aces > 0) {
+    total -= 10;
+    aces--;
+  }
+  return total;
+}
+
+function getCardColor(card) {
+  return (card.suit === '♥' || card.suit === '♦') ? 'red' : 'black';
+}
+
+function renderCards(containerId, cards, hideSecond = false) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  
+  cards.forEach((card, index) => {
+    const cardDiv = document.createElement('div');
+    cardDiv.className = `card ${getCardColor(card)}`;
+    
+    if(containerId === 'dealer-cards' && index === 1 && hideSecond && !gameOver) {
+      cardDiv.classList.add('back');
+      cardDiv.textContent = '';
+    } else {
+      cardDiv.textContent = `${card.value}${card.suit}`;
+    }
+    
+    container.appendChild(cardDiv);
+    
+    // แสดงไพ่พร้อมอนิเมชั่น
+    setTimeout(() => {
+      cardDiv.style.opacity = '0';
+      cardDiv.style.transform = 'translateY(20px)';
+      cardDiv.style.transition = 'all 0.5s ease';
+      
+      setTimeout(() => {
+        cardDiv.style.opacity = '1';
+        cardDiv.style.transform = 'translateY(0)';
+      }, 50);
+    }, index * 200);
+  });
+}
+
+function updateUI() {
+  playCardSound();
+  renderCards('player-cards', playerCards);
+  renderCards('dealer-cards', dealerCards, true);
+  
+  const playerVal = handValue(playerCards);
+  const dealerVal = gameOver ? handValue(dealerCards) : (dealerCards.length > 0 ? getCardValue(dealerCards[0]) + '+?' : 0);
+  
+  document.getElementById('player-value').textContent = `คะแนน: ${playerVal}`;
+  document.getElementById('dealer-value').textContent = gameOver ? `คะแนน: ${dealerVal}` : `คะแนน: ${dealerVal}`;
+  
+  if(playerVal > 21) {
+    document.getElementById('status').textContent = 'คุณเสีย! 💥';
+    gameOver = true;
+    disableButtons();
+    playLoseSound();
+  }
+}
+
+function disableButtons() {
+  document.getElementById('hit-btn').disabled = true;
+  document.getElementById('stand-btn').disabled = true;
+}
+
+function enableButtons() {
+  document.getElementById('hit-btn').disabled = false;
+  document.getElementById('stand-btn').disabled = false;
+}
+
+function hit() {
+  if(gameOver) return;
+  playerCards.push(deck.pop());
+  updateUI();
+}
+
+function stand() {
+  if(gameOver) return;
+  gameOver = true;
+  disableButtons();
+  
+  // เปิดไพ่เจ้ามือที่ซ่อนไว้
+  renderCards('dealer-cards', dealerCards, false);
+  
+  // เจ้ามือจั่วไพ่ต่อ
+  const drawDealerCard = () => {
+    if(handValue(dealerCards) < 17) {
+      dealerCards.push(deck.pop());
+      playCardSound();
+      renderCards('dealer-cards', dealerCards, false);
+      setTimeout(drawDealerCard, 1000);
+    } else {
+      checkWinner();
+    }
+  };
+  
+  setTimeout(drawDealerCard, 1000);
+}
+
+function checkWinner() {
+  const playerVal = handValue(playerCards);
+  const dealerVal = handValue(dealerCards);
+  const status = document.getElementById('status');
+  
+  document.getElementById('dealer-value').textContent = `คะแนน: ${dealerVal}`;
+  
+  if(dealerVal > 21 || playerVal > dealerVal) {
+    status.textContent = 'คุณชนะ! 🎉';
+    playWinSound();
+  } else if(playerVal < dealerVal) {
+    status.textContent = 'เจ้ามือชนะ! 😭';
+    playLoseSound();
+  } else {
+    status.textContent = "เสมอกัน! 🤝";
+    playTone(500, 0.3);
+  }
+}
+
+function restart() {
+  initAudio();
+  deck = createDeck();
+  playerCards = [deck.pop(), deck.pop()];
+  dealerCards = [deck.pop(), deck.pop()];
+  gameOver = false;
+  
+  document.getElementById('status').textContent = '';
+  enableButtons();
+  updateUI();
+}
+
+// เริ่มเกมเมื่อโหลดหน้าเสร็จ
+document.addEventListener('DOMContentLoaded', function() {
+  restart();
+});
+</script>
+
+</body>
+</html>

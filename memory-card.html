@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧠 เกมจำไพ่</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 5px;
+      overflow: hidden;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 600px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    header {
+      text-align: center;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    
+    h1 {
+      font-size: 2em;
+      color: #ffd700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      margin-bottom: 5px;
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    
+    .stat-label {
+      font-size: 0.8em;
+      opacity: 0.8;
+    }
+    
+    .stat-value {
+      font-size: 1.2em;
+      color: #ffd700;
+    }
+    
+    .timer {
+      color: #ff6b6b !important;
+    }
+    
+    .timer.warning {
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .game-panel {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 15px;
+      padding: 15px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .difficulty-selector {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .difficulty-btn {
+      font-family: 'Sarabun', sans-serif;
+      font-size: 0.9em;
+      font-weight: 600;
+      padding: 8px 16px;
+      background: linear-gradient(45deg, #ffd700, #ffed4e);
+      color: #333;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      min-width: 70px;
+    }
+    
+    .difficulty-btn:hover {
+      background: linear-gradient(45deg, #ffed4e, #fff);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    
+    .difficulty-btn.active {
+      background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+      color: #fff;
+    }
+    
+    .cards-grid {
+      display: grid;
+      gap: 8px;
+      justify-content: center;
+      margin: 15px 0;
+      flex: 1;
+      align-content: center;
+    }
+    
+    .cards-grid.easy {
+      grid-template-columns: repeat(4, 1fr);
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    
+    .cards-grid.medium {
+      grid-template-columns: repeat(4, 1fr);
+      max-width: 350px;
+      margin: 0 auto;
+    }
+    
+    .cards-grid.hard {
+      grid-template-columns: repeat(6, 1fr);
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    
+    .card {
+      aspect-ratio: 3/4;
+      background: linear-gradient(45deg, #2c3e50, #34495e);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+    }
+    
+    .card::before {
+      content: "🂠";
+      font-size: 2em;
+      color: #ecf0f1;
+      opacity: 0.7;
+    }
+    
+    .card.flipped {
+      background: #fff;
+      color: #333;
+      transform: rotateY(0deg);
+    }
+    
+    .card.flipped::before {
+      display: none;
+    }
+    
+    .card.flipped.red {
+      color: #e74c3c;
+    }
+    
+    .card.flipped.black {
+      color: #2c3e50;
+    }
+    
+    .card.matched {
+      background: linear-gradient(45deg, #27ae60, #2ecc71);
+      color: #fff;
+      cursor: default;
+      opacity: 0.8;
+    }
+    
+    .card.matched::before {
+      display: none;
+    }
+    
+    .card:hover:not(.flipped):not(.matched) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    }
+    
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .game-button {
+      font-family: 'Sarabun', sans-serif;
+      font-size: 0.95em;
+      font-weight: 600;
+      padding: 8px 16px;
+      background: linear-gradient(45deg, #ffd700, #ffed4e);
+      color: #333;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      min-width: 80px;
+    }
+    
+    .game-button:hover {
+      background: linear-gradient(45deg, #ffed4e, #fff);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    
+    .game-button:disabled {
+      background: #666;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    #status {
+      font-size: 1.1em;
+      font-weight: 600;
+      margin: 10px 0;
+      min-height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffd700;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+    
+    .win-message {
+      color: #27ae60 !important;
+      font-size: 1.3em !important;
+    }
+    
+    .lose-message {
+      color: #e74c3c !important;
+      font-size: 1.3em !important;
+    }
+    
+    @media (max-width: 600px) {
+      body {
+        padding: 3px;
+      }
+      
+      h1 {
+        font-size: 1.8em;
+      }
+      
+      .stats {
+        padding: 8px 12px;
+      }
+      
+      .stat-value {
+        font-size: 1.1em;
+      }
+      
+      .cards-grid {
+        gap: 6px;
+      }
+      
+      .cards-grid.easy {
+        max-width: 280px;
+      }
+      
+      .cards-grid.medium {
+        max-width: 320px;
+      }
+      
+      .cards-grid.hard {
+        max-width: 360px;
+      }
+      
+      .card {
+        font-size: 1.2em;
+      }
+      
+      .card::before {
+        font-size: 1.5em;
+      }
+      
+      .difficulty-btn, .game-button {
+        font-size: 0.85em;
+        padding: 6px 12px;
+        min-width: 65px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🧠 เกมจำไพ่</h1>
+  </header>
+
+  <div class="stats">
+    <div class="stat-item">
+      <div class="stat-label">เวลา</div>
+      <div class="stat-value timer" id="timer">60</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">คู่ที่เหลือ</div>
+      <div class="stat-value" id="pairs-left">8</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">การเปิด</div>
+      <div class="stat-value" id="moves">0</div>
+    </div>
+  </div>
+
+  <div class="game-panel">
+    <div class="difficulty-selector">
+      <button class="difficulty-btn active" onclick="setDifficulty('easy')">ง่าย (8คู่)</button>
+      <button class="difficulty-btn" onclick="setDifficulty('medium')">ปกติ (10คู่)</button>
+      <button class="difficulty-btn" onclick="setDifficulty('hard')">ยาก (18คู่)</button>
+    </div>
+    
+    <div id="cards-grid" class="cards-grid easy"></div>
+    
+    <div class="controls">
+      <button class="game-button" onclick="startGame()">เริ่มเกม</button>
+      <button class="game-button" onclick="pauseGame()" id="pause-btn">หยุด</button>
+    </div>
+    
+    <div id="status">เลือกความยากและกดเริ่มเกม</div>
+  </div>
+</div>
+
+<script>
+// ข้อมูลไพ่
+const suits = ['♠','♥','♦','♣'];
+const values = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+
+// ตัวแปรเกม
+let gameCards = [];
+let flippedCards = [];
+let matchedPairs = 0;
+let totalPairs = 8;
+let moves = 0;
+let gameTime = 60;
+let gameTimer = null;
+let isGameRunning = false;
+let isPaused = false;
+let currentDifficulty = 'easy';
+
+// การตั้งค่าความยาก
+const difficulties = {
+  easy: { pairs: 8, time: 60 },
+  medium: { pairs: 10, time: 90 },
+  hard: { pairs: 18, time: 120 }
+};
+
+// เสียง
+let audioContext;
+
+function initAudio() {
+  try {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  } catch(e) {
+    console.log('Audio not supported');
+  }
+}
+
+function playTone(frequency, duration, type = 'sine') {
+  if (!audioContext) return;
+  
+  try {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = frequency;
+    oscillator.type = type;
+    
+    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + duration);
+  } catch(e) {
+    console.log('Sound play failed');
+  }
+}
+
+function playFlipSound() {
+  playTone(800, 0.1);
+}
+
+function playMatchSound() {
+  playTone(1000, 0.2);
+  setTimeout(() => playTone(1200, 0.2), 100);
+}
+
+function playWinSound() {
+  playTone(800, 0.2);
+  setTimeout(() => playTone(1000, 0.2), 100);
+  setTimeout(() => playTone(1200, 0.3), 200);
+}
+
+function playLoseSound() {
+  playTone(300, 0.5, 'sawtooth');
+}
+
+// ฟังก์ชันเกม
+function setDifficulty(level) {
+  if (isGameRunning) return;
+  
+  currentDifficulty = level;
+  totalPairs = difficulties[level].pairs;
+  gameTime = difficulties[level].time;
+  
+  // อัพเดต UI
+  document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  document.getElementById('pairs-left').textContent = totalPairs;
+  document.getElementById('timer').textContent = gameTime;
+  document.getElementById('cards-grid').className = `cards-grid ${level}`;
+  
+  setupCards();
+}
+
+function createCardPairs() {
+  const cards = [];
+  const usedCards = new Set();
+  
+  // สร้างไพ่คู่
+  for (let i = 0; i < totalPairs; i++) {
+    let suit, value;
+    do {
+      suit = suits[Math.floor(Math.random() * suits.length)];
+      value = values[Math.floor(Math.random() * values.length)];
+    } while (usedCards.has(`${value}${suit}`));
+    
+    usedCards.add(`${value}${suit}`);
+    const cardData = { value, suit, id: i };
+    cards.push(cardData, { ...cardData }); // เพิ่ม 2 ใบ (คู่)
+  }
+  
+  // สุ่มไพ่
+  return cards.sort(() => Math.random() - 0.5);
+}
+
+function getCardColor(card) {
+  return (card.suit === '♥' || card.suit === '♦') ? 'red' : 'black';
+}
+
+function setupCards() {
+  gameCards = createCardPairs();
+  const grid = document.getElementById('cards-grid');
+  grid.innerHTML = '';
+  
+  gameCards.forEach((card, index) => {
+    const cardElement = document.createElement('div');
+    cardElement.className = 'card';
+    cardElement.dataset.cardId = card.id;
+    cardElement.dataset.index = index;
+    cardElement.onclick = () => flipCard(index);
+    
+    // ซ่อนข้อมูลไพ่
+    cardElement.dataset.value = card.value;
+    cardElement.dataset.suit = card.suit;
+    cardElement.dataset.color = getCardColor(card);
+    
+    grid.appendChild(cardElement);
+  });
+}
+
+function flipCard(index) {
+  if (!isGameRunning || isPaused) return;
+  if (flippedCards.length >= 2) return;
+  
+  const cardElement = document.querySelector(`[data-index="${index}"]`);
+  if (cardElement.classList.contains('flipped') || cardElement.classList.contains('matched')) return;
+  
+  // เปิดไพ่
+  cardElement.classList.add('flipped', cardElement.dataset.color);
+  cardElement.textContent = `${cardElement.dataset.value}${cardElement.dataset.suit}`;
+  flippedCards.push(index);
+  moves++;
+  
+  playFlipSound();
+  updateUI();
+  
+  if (flippedCards.length === 2) {
+    setTimeout(checkMatch, 800);
+  }
+}
+
+function checkMatch() {
+  const [index1, index2] = flippedCards;
+  const card1 = document.querySelector(`[data-index="${index1}"]`);
+  const card2 = document.querySelector(`[data-index="${index2}"]`);
+  
+  if (card1.dataset.cardId === card2.dataset.cardId) {
+    // ไพ่เหมือนกัน
+    card1.classList.add('matched');
+    card2.classList.add('matched');
+    matchedPairs++;
+    playMatchSound();
+    
+    if (matchedPairs === totalPairs) {
+      winGame();
+    }
+  } else {
+    // ไพ่ไม่เหมือนกัน
+    card1.classList.remove('flipped', card1.dataset.color);
+    card2.classList.remove('flipped', card2.dataset.color);
+    card1.textContent = '';
+    card2.textContent = '';
+  }
+  
+  flippedCards = [];
+  updateUI();
+}
+
+function updateUI() {
+  document.getElementById('pairs-left').textContent = totalPairs - matchedPairs;
+  document.getElementById('moves').textContent = moves;
+  
+  const timerElement = document.getElementById('timer');
+  timerElement.textContent = gameTime;
+  
+  if (gameTime <= 10) {
+    timerElement.classList.add('warning');
+  } else {
+    timerElement.classList.remove('warning');
+  }
+}
+
+function startTimer() {
+  gameTimer = setInterval(() => {
+    if (isPaused) return;
+    
+    gameTime--;
+    updateUI();
+    
+    if (gameTime <= 0) {
+      loseGame();
+    }
+  }, 1000);
+}
+
+function startGame() {
+  initAudio();
+  isGameRunning = true;
+  isPaused = false;
+  matchedPairs = 0;
+  moves = 0;
+  gameTime = difficulties[currentDifficulty].time;
+  
+  setupCards();
+  startTimer();
+  updateUI();
+  
+  document.getElementById('status').textContent = 'เกมเริ่มแล้ว! จับคู่ไพ่ให้ครบก่อนหมดเวลา';
+  document.getElementById('pause-btn').textContent = 'หยุด';
+  document.getElementById('pause-btn').disabled = false;
+}
+
+function pauseGame() {
+  if (!isGameRunning) return;
+  
+  isPaused = !isPaused;
+  const pauseBtn = document.getElementById('pause-btn');
+  
+  if (isPaused) {
+    pauseBtn.textContent = 'เล่นต่อ';
+    document.getElementById('status').textContent = 'เกมหยุดชั่วคราว';
+    
+    // ซ่อนไพ่ที่เปิดอยู่
+    document.querySelectorAll('.card.flipped:not(.matched)').forEach(card => {
+      card.style.visibility = 'hidden';
+    });
+  } else {
+    pauseBtn.textContent = 'หยุด';
+    document.getElementById('status').textContent = 'เกมดำเนินต่อ';
+    
+    // แสดงไพ่ที่เปิดอยู่
+    document.querySelectorAll('.card.flipped:not(.matched)').forEach(card => {
+      card.style.visibility = 'visible';
+    });
+  }
+}
+
+function winGame() {
+  isGameRunning = false;
+  clearInterval(gameTimer);
+  playWinSound();
+  
+  document.getElementById('status').innerHTML = 
+    `<span class="win-message">🎉 ยินดีด้วย! คุณชนะแล้ว!<br>ใช้เวลา ${difficulties[currentDifficulty].time - gameTime} วินาที</span>`;
+  document.getElementById('pause-btn').disabled = true;
+}
+
+function loseGame() {
+  isGameRunning = false;
+  clearInterval(gameTimer);
+  playLoseSound();
+  
+  document.getElementById('status').innerHTML = 
+    '<span class="lose-message">⏰ หมดเวลา! ลองใหม่อีกครั้ง</span>';
+  document.getElementById('pause-btn').disabled = true;
+  
+  // แสดงไพ่ที่เหลือ
+  document.querySelectorAll('.card:not(.matched)').forEach(card => {
+    card.classList.add('flipped', card.dataset.color);
+    card.textContent = `${card.dataset.value}${card.dataset.suit}`;
+    card.style.opacity = '0.6';
+  });
+}
+
+// เริ่มต้น
+document.addEventListener('DOMContentLoaded', function() {
+  setupCards();
+});
+</script>
+
+</body>
+</html>
